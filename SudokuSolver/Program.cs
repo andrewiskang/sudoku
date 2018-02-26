@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SudokuSolver
 {
@@ -32,12 +33,12 @@ namespace SudokuSolver
             }
 
             // check if values within same square are different from value
-            int[] squareIndex = { (x + 1) / 3, (j + 1) / 3 };
+            int[] squareIndex = { (x + 1) / 3, (y + 1) / 3 };
             // use floor division to identify which square the entry is in
             // squareIndex is valid from (0, 0) to (2, 2)
-            for (int i = squareIndex[0] * 3; i < i + 3; i++)
+            for (int i = squareIndex[0] * 3; i < squareIndex[0] + 3; i++)
             {
-                for (int j = squareIndex[1] * 3; j < j + 3; j++) ;
+                for (int j = squareIndex[1] * 3; j < squareIndex[1] + 3; j++)
                 {
                     if (grid[i, j] == value)
                     {
@@ -93,7 +94,7 @@ namespace SudokuSolver
                         if (workingGrid[i, j] == 0)
                         {
                             List<int> validList = ValidValues(workingGrid, i, j);
-                            int validCount = validList.Count();
+                            int validCount = validList.Count;
                             switch (validCount)
                             {
                                 case 0:
@@ -101,6 +102,7 @@ namespace SudokuSolver
                                     break;
                                 case 1:
                                     workingGrid[i, j] = validList[0];
+                                    Console.WriteLine("added {0} at ({1}, {2})", workingGrid[i, j], i, j);
                                     break;
                                 default:
                                     break;
@@ -108,7 +110,7 @@ namespace SudokuSolver
                         }
                     }
                 }
-            } while GridIncomplete(workingGrid);
+            } while (GridIncomplete(workingGrid));
             return workingGrid;
         }
 
@@ -119,7 +121,7 @@ namespace SudokuSolver
             {
                 for (int i = 0; i < 9; i++)
                 {
-                    Console.Write(grid[i, j]);
+                    Console.Write("{0} ", grid[i, j]);
                 }
                 Console.Write('\n');
             }
@@ -143,15 +145,15 @@ namespace SudokuSolver
 
         // command line will take multiple sudoku puzzles (0-n)
         // and output the completed grids
-        public static void Main()
+        public static void Main(string[] args)
         {
             foreach (var arg in args)
             {
                 switch (arg)
                 {
-                    case 0:
-                        PrintGrid(grid);
-                        PrintGrid(SolveGrid(grid));
+                    case "0":
+                        PrintGrid(SampleGrid0());
+                        PrintGrid(SolveGrid(SampleGrid0()));
                         break;
                     default:
                         break;
