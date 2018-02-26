@@ -33,7 +33,7 @@ namespace SudokuSolver
             }
 
             // check if values within same square are different from value
-            int[] squareIndex = { (x + 1) / 3, (y + 1) / 3 };
+            int[] squareIndex = { x / 3, y / 3 };
             // use floor division to identify which square the entry is in
             // squareIndex is valid from (0, 0) to (2, 2)
             for (int i = squareIndex[0] * 3; i < squareIndex[0] + 3; i++)
