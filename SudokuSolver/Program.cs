@@ -5,64 +5,43 @@ namespace SudokuSolver
 {
     class MainClass
     {
-        // method to check whether entry is valid relative to given board
-        public static bool ValidEntry(int[,] grid, int x, int y, int value)
+        // method to return all valid values for an entry given sudoku board
+        public static List<int> ValidEntries(int[,] grid, int x, int y)
         {
-            // sanity check: value must be between 1 and 9, inclusive
-            if (value < 1 || value > 9)
-            {
-                return false;
-            }
-
-            // check if values within same row are different from value
-            for (int i = 0; i < 9; i++)
-            {
-                if (grid[i, y] == value)
-                {
-                    return false;
-                }
-            }
-
-            // check if values within same column are different from value
-            for (int j = 0; j < 9; j++)
-            {
-                if (grid[x, j] == value)
-                {
-                    return false;
-                }
-            }
-
-            // check if values within same square are different from value
-            int[] squareIndex = { x / 3, y / 3 };
+            // initialize full list from 1-9 and remove values within same 3x3
+            List<int> validList = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             // use floor division to identify which square the entry is in
             // squareIndex is valid from (0, 0) to (2, 2)
-            for (int i = squareIndex[0] * 3; i < squareIndex[0] + 3; i++)
+            int[] squareIndex = { x / 3, y / 3 };
+            for (int i = squareIndex[0] * 3; i < squareIndex[0] * 3 + 3; i++)
             {
-                for (int j = squareIndex[1] * 3; j < squareIndex[1] + 3; j++)
+                for (int j = squareIndex[1] * 3; j < squareIndex[1] * 3 + 3; j++)
                 {
-                    if (grid[i, j] == value)
+                    if (grid[i, j] != 0)
                     {
-                        return false;
+                        validList.Remove(grid[i, j]);
                     }
                 }
             }
 
-            // if all tests clear:
-            return true;
-        }
-
-        // method to return list of valid values for an entry in a given grid
-        public static List<int> ValidValues(int[,] grid, int x, int y)
-        {
-            List<int> valuesList = new List<int>();
-            for (int i = 1; i < 10; i++)
+            // now remove all entries within same row
+            for (int i = 0; i < 9; i++)
             {
-                if (ValidEntry(grid, x, y, i))
+                if (grid[i, y] != 0)
                 {
-                    valuesList.Add(i);
+                    validList.Remove(grid[i, y]);
                 }
             }
-            return valuesList;
+
+            // now remove all entries within same column
+            for (int j = 0; j < 9; j++)
+            {
+                if (grid[x, j] != 0)
+                {
+                    validList.Remove(grid[x, j]);
+                }
+            }
+            return validList;
         }
 
         // method to determine if sudoku grid is incomplete (contains 0)
@@ -93,7 +72,7 @@ namespace SudokuSolver
                     {
                         if (workingGrid[i, j] == 0)
                         {
-                            List<int> validList = ValidValues(workingGrid, i, j);
+                            List<int> validList = ValidEntries(workingGrid, i, j);
                             int validCount = validList.Count;
                             switch (validCount)
                             {
@@ -111,6 +90,7 @@ namespace SudokuSolver
                     }
                 }
             } while (GridIncomplete(workingGrid));
+            Console.Write('\n');
             return workingGrid;
         }
 
@@ -127,7 +107,7 @@ namespace SudokuSolver
             }
         }
 
-        // sample sudoku grid for testing
+        // sample sudoku grids for testing
         public static int[,] SampleGrid0()
         {
             return new int[,] {
@@ -142,6 +122,34 @@ namespace SudokuSolver
                 {7, 0, 8, 1, 0, 0, 0, 0, 0}
             };
         }
+        public static int[,] SampleGrid1()
+        {
+            return new int[,] {
+                {0, 0, 0, 7, 0, 1, 0, 0, 0},
+                {4, 0, 9, 0, 6, 2, 3, 0, 0},
+                {3, 0, 1, 0, 0, 0, 2, 6, 7},
+                {6, 0, 0, 0, 0, 7, 0, 4, 0},
+                {1, 0, 0, 4, 5, 8, 0, 0, 6},
+                {0, 4, 0, 6, 0, 0, 0, 0, 2},
+                {7, 6, 3, 0, 0, 0, 1, 0, 9},
+                {0, 0, 5, 1, 9, 0, 4, 0, 3},
+                {0, 0, 0, 5, 0, 3, 0, 0, 0}
+            };
+        }
+        public static int[,] SampleGrid2()
+        {
+            return new int[,] {
+                {0, 0, 0, 0, 2, 9, 5, 0, 6},
+                {0, 0, 0, 8, 0, 0, 0, 0, 0},
+                {0, 9, 0, 0, 0, 0, 8, 4, 0},
+                {0, 0, 7, 0, 6, 0, 2, 0, 5},
+                {0, 1, 0, 0, 0, 0, 0, 9, 0},
+                {6, 0, 2, 0, 9, 0, 4, 0, 0},
+                {0, 6, 1, 0, 0, 0, 0, 3, 0},
+                {0, 0, 0, 0, 0, 6, 0, 0, 0},
+                {4, 0, 3, 1, 8, 0, 0, 0, 0}
+            };
+        }
 
         // command line will take multiple sudoku puzzles (0-n)
         // and output the completed grids
@@ -152,8 +160,28 @@ namespace SudokuSolver
                 switch (arg)
                 {
                     case "0":
+                        Console.WriteLine("Starting grid:");
                         PrintGrid(SampleGrid0());
-                        PrintGrid(SolveGrid(SampleGrid0()));
+                        int[,] completedGrid = SolveGrid(SampleGrid0());
+                        Console.WriteLine("Completed grid:");
+                        PrintGrid(completedGrid);
+                        Console.WriteLine('\n');
+                        break;
+                    case "1":
+                        Console.WriteLine("Starting grid:");
+                        PrintGrid(SampleGrid1());
+                        completedGrid = SolveGrid(SampleGrid1());
+                        Console.WriteLine("Completed grid:");
+                        PrintGrid(completedGrid);
+                        Console.WriteLine('\n');
+                        break;
+                    case "2":
+                        Console.WriteLine("Starting grid:");
+                        PrintGrid(SampleGrid2());
+                        completedGrid = SolveGrid(SampleGrid2());
+                        Console.WriteLine("Completed grid:");
+                        PrintGrid(completedGrid);
+                        Console.WriteLine('\n');
                         break;
                     default:
                         break;
